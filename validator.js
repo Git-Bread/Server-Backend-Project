@@ -1,5 +1,5 @@
 //comprehensive validation
-export async function validate(obj, mode, login) {
+export default async function validate(obj, mode, login) {
     //holds all errors for comprehensive output
     let errors = [];
 
@@ -45,18 +45,28 @@ export async function validate(obj, mode, login) {
             if (!obj.body.username) {
                 errors.push("No username")
             }
+            if (!obj.body.number) {
+                errors.push("No number")
+            }
             //regex for email format, makes sure it is two parts and an @ aswell as an 2-4 ending such as .com
-            const regex = /^[a-zA-Z0–9._-]+@[a-zA-Z0–9.-]+\.[a-zA-Z]{2,4}$/;
+            let regex = /^[a-zA-Z0–9._-]+@[a-zA-Z0–9.-]+\.[a-zA-Z]{2,4}$/;
             let valid = regex.test(obj.body.email);
             if (!valid) {
                 errors.push("Invalid username, use your email")
             }
                         
             //makes sure password contains a capital letter, one numbers and atleast 6 symbols
-            const passRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/
-            valid = passRegex.test(obj.body.password)
+            regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+            valid = regex.test(obj.body.password)
             if (!valid) {
                 errors.push("password invalid, it needs to be atleast six symbols, one uppercase letter, and two numbers")
+            }
+
+            //checks if phone number is real
+            regex = /^[0-9]{8}$/;
+            valid = regex.test(obj.body.number)
+            if (!valid) {
+                errors.push("phone number invalid")
             }
 
             //sends all the errors back

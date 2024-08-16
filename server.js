@@ -1,27 +1,26 @@
 //-------------------------------------------------- IMPORTS AND SETUP ------------------------------------------------------//
-import { auth } from "./auth";
-import { validate } from "./validator";
-import { register } from "./crud";
-
+//import { auth } from "./auth";
+import validator from "./validator.js";
 
 //express imports to facilitate the webbapp
-const express = require("express");
+import express, { json } from "express";
 const app = express();
-app.use(express.json());
+app.use(json());
 
 //mongo db and dotenv stuff
-require("dotenv").config({path: "values.env"});
+import dotenv from "dotenv";
+dotenv.config({path: "values.env"});
 
 //opens to cross origin
-const cors = require("cors");
+import cors from "cors";
 app.use(cors());
 
 //hashing
-const bcrypt = require("bcrypt");
-const salt = bcrypt.genSalt(10);
+//import { genSalt, hash } from "bcrypt";
+//const salt = genSalt(10);
 
 //JWT
-const jwt = require("jsonwebtoken");
+//import jwt from "jsonwebtoken";
 
 //prefered port or 27017
 const port = process.env.port | 27017;
@@ -36,29 +35,29 @@ app.listen(apiPort, () => {console.log("listening")});
 //-------------------------------------------------- MONGODB ------------------------------------------------------//
 
 //mongoose for schema and stuff
-const mongoose = require("mongoose");
-mongoose
-    .connect(url)
+import { connect, Schema, model } from "mongoose";
+connect(url)
     .then(() => {console.log("connected!")})
     .catch((error) => console.log("ERROR: " + error));
 
 //schema
-const loginSchema = mongoose.Schema({
+const loginSchema = Schema({
     username: String,  //email
     password: String,
     name: String,
+    number: Number,
     booked: Object
 });
 
 //hashes password before adding it
 loginSchema.pre('save', async function(next){
-    this.password = bcrypt.hash(this.password, salt); 
-    console.log(bcrypt.hash(this.password, salt));
+    this.password = hash(this.password, salt); 
+    console.log(hash(this.password, salt));
     next()
 })
 
 //model
-const login = mongoose.model("login", loginSchema);
+const login = model("login", loginSchema);
 
 
 //-------------------------------------------------- Operations ------------------------------------------------------//
@@ -66,17 +65,24 @@ const login = mongoose.model("login", loginSchema);
 //register acount
 app.post("/register", async (req, res) => {
     //Error handling
-    let val = await validate(req, 2, login)
-    if(val != "") {
-        res.status(400).send({error: val});
+    try {
+        let val = await validator(req, 2, login)
+        if(val != "") {
+            res.status(400).send({error: val});
+            return;
+        } 
+    } catch (error) {
+        res.status(400).send({error: error});
     }
 
     let newUser = new login({
-        username: obj.body.username,
-        password: obj.body.password,
-        name: obj.body.name,
+        username: req.body.username,
+        password: req.body.password,
+        name: req.body.name,
+        number: req.body.number,
         booked: false
-    });
+    });  
+    
     newUser.save();
     res.status(200).send({message: "Account registered"});
 })
