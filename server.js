@@ -15,13 +15,6 @@ dotenv.config({path: "values.env"});
 import cors from "cors";
 app.use(cors());
 
-//hashing
-//import { genSalt, hash } from "bcrypt";
-//const salt = genSalt(10);
-
-//JWT
-//import jwt from "jsonwebtoken";
-
 //prefered port or 27017
 const port = process.env.port | 27017;
 
@@ -49,17 +42,25 @@ const loginSchema = Schema({
     booked: Object
 });
 
+//model
+const login = model("login", loginSchema);
+
+//-------------------------------------------------- Hashing/JWT ------------------------------------------------------//
+/*
+//hashing
+import { genSalt, hash } from "bcrypt";
+const salt = genSalt(10);
+
+//JWT
+import jwt from "jsonwebtoken";
+
 //hashes password before adding it
 loginSchema.pre('save', async function(next){
     this.password = hash(this.password, salt); 
     console.log(hash(this.password, salt));
     next()
 })
-
-//model
-const login = model("login", loginSchema);
-
-
+*/
 //-------------------------------------------------- Operations ------------------------------------------------------//
 
 //register acount

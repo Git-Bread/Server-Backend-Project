@@ -30,8 +30,16 @@ export default async function validate(obj, mode, login) {
                 return errors;   
             }
         
+        //registration
         case 2:
-            //compares usernames to check for duplicate, sort of bad praxis due to the whole "you know an account exists"
+            //compares numbers to check for duplicate
+            for (let index = 0; index < logins.length; index++) {
+                if (obj.body.number == logins[index].number) {
+                    errors.push("Invalid number, that number is already in use")
+                }  
+            }
+
+            //compares usernames to check for duplicate
             for (let index = 0; index < logins.length; index++) {
                 if (obj.body.username == logins[index].username) {
                     errors.push("Invalid username, that email already has an account")
@@ -50,7 +58,7 @@ export default async function validate(obj, mode, login) {
             }
             //regex for email format, makes sure it is two parts and an @ aswell as an 2-4 ending such as .com
             let regex = /^[a-zA-Z0–9._-]+@[a-zA-Z0–9.-]+\.[a-zA-Z]{2,4}$/;
-            let valid = regex.test(obj.body.email);
+            let valid = regex.test(obj.body.username);
             if (!valid) {
                 errors.push("Invalid username, use your email")
             }
