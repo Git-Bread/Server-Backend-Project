@@ -1,4 +1,9 @@
 //-------------------------------------------------- IMPORTS AND SETUP ------------------------------------------------------//
+import { auth } from "./auth";
+import { validate } from "./validator";
+import { register } from "./crud";
+
+
 //express imports to facilitate the webbapp
 const express = require("express");
 const app = express();
@@ -41,7 +46,8 @@ mongoose
 const loginSchema = mongoose.Schema({
     username: String,  //email
     password: String,
-    name: String
+    name: String,
+    booked: Object
 });
 
 //hashes password before adding it
@@ -53,3 +59,25 @@ loginSchema.pre('save', async function(next){
 
 //model
 const login = mongoose.model("login", loginSchema);
+
+
+//-------------------------------------------------- Operations ------------------------------------------------------//
+
+//register acount
+app.post("/register", async (req, res) => {
+    //Error handling
+    let val = await validate(req, 2, login)
+    if(val != "") {
+        res.status(400).send({error: val});
+    }
+
+    let newUser = new login({
+        username: obj.body.username,
+        password: obj.body.password,
+        name: obj.body.name,
+        booked: false
+    });
+    newUser.save();
+    res.status(200).send({message: "Account registered"});
+})
+
