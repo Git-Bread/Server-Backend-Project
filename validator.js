@@ -1,8 +1,7 @@
-//comprehensive validation
+//comprehensive input validation
 export default async function validate(obj, mode, login) {
     //holds all errors for comprehensive output
     let errors = [];
-
     //checks for standard empty
     if (!obj.body.username) {
         errors.push("No username")
@@ -85,4 +84,26 @@ export default async function validate(obj, mode, login) {
             break;
     }
     return false
+}
+
+import { compare } from "bcrypt";
+//validates password
+export async function loginValidation(obj, login) {
+    let uname = obj.body.username;
+    let password = obj.body.password;
+    let user = await login.find({username: uname});
+
+    //hash compare
+    try {
+        if (await compare(password, user[0].password)) {
+            console.log("Correct password for user: " + uname);
+            return true;
+        }
+        else {
+            return false
+        }   
+    } catch (error) {
+        console.log("it broke");
+        return false;
+    }
 }
