@@ -107,3 +107,15 @@ export async function loginValidation(obj, login) {
         return false;
     }
 }
+
+
+export async function menuItemValidation(obj) {
+    let errors = [];
+    if (!obj.body.name) { errors.push("no menuitem name") };
+    if (!obj.body.price) { errors.push("no menuitem price")};
+    if (!obj.body.description) { errors.push("no menuitem description")};
+    if (errors[0] != "") {
+        return errors;
+    }
+    return false;
+}

@@ -52,6 +52,7 @@ const loginSchema = Schema({
 const menuSchema = Schema({
     image: String,
     name: String,
+    description: String,
     price: Number,
     allergies: Array
 });
@@ -136,9 +137,20 @@ app.post("/managment/adminLoginPage", async (req, res) => {
 
 app.post("/managment/addMenuItem", async (req, res) => {
     if(authorization.auth(req)){
+        let test = await validator.menuItemValidation(req);
+        if (test != false) {
+            res.status(400).send({error: test})
+        }
+        if (!req.body.image) {
+            req.body.image = "no image";
+        }
+        if (!req.body.allergies) {
+            req.body.allergies = "no allergies";
+        }
         let newItem = new menu({
             image: req.body.image,
             name: req.body.name,
+            description: req.body.string,
             price: req.body.price,
             allergies: req.body.allergies
         });  
@@ -150,35 +162,18 @@ app.post("/managment/addMenuItem", async (req, res) => {
 })
 
 //todo
-app.post("/managment/editMenuItem", async (req, res) => {
-    let newItem = new menu({
-        image: req.body.image,
-        name: req.body.name,
-        price: req.body.price,
-        allergies: req.body.allergies
-    });  
-    /*  VALIDATION NEEDED
-    if (validator) {
-        
+app.put("/managment/editMenuItem", async (req, res) => {
+    let val = await validator.menuItemValidation(req);
+    if (val != false) {
+        res.status(400).send({error: val})
     }
-    */
-   newItem.save();
+    await menu.updateOne({_id: req.body.id},{name: req.body.name, image: req.body.image, description: req.body.image, price: req.body.price, allergies: req.body.allergies})
+    res.json({message: "updated item"});
 })
 
 //todo
 app.delete("/managment/removeMenuItem", async (req, res) => {
-    let newItem = new menu({
-        image: req.body.image,
-        name: req.body.name,
-        price: req.body.price,
-        allergies: req.body.allergies
-    });  
-    /*  VALIDATION NEEDED
-    if (validator) {
-        
-    }
-    */
-   newItem.save();
+    await menu.deleteOne({_id: req.body.id});
 })
 
 app.get("/menuItems", async (req, res) => {
