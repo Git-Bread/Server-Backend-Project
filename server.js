@@ -1,5 +1,6 @@
 //-------------------------------------------------- IMPORTS AND SETUP ------------------------------------------------------//
-import validate, * as validator from "./validator.js";
+import * as validator from "./validator.js";
+import * as authorization from "./auth.js";
 
 //express imports to facilitate the webbapp
 import express, { json } from "express";
@@ -59,7 +60,7 @@ const menuSchema = Schema({
 //hashes password before adding it
 loginSchema.pre('validate', async function(next){
     let pass = this.password;
-    this.password = await hash(pass, 10); 
+    this.password = await hash(pass, process.env.STANDARD_TOKEN); 
     next()
 })
 
@@ -121,10 +122,11 @@ app.post("/login", async (req, res) => {
     }
 })
 
-app.post("/adminLoginPage", async (req, res) => {
+app.post("/managment/adminLoginPage", async (req, res) => {
     //validate for input errors
-    if (req.body.username != process.env.ADMIN_NAME && req.body.password != process.env.ADMIN_PASSWORD) {
-        res.status(400).send({error: "invalid username or password, try again and contact your supervisor if issue persist"})
+    if (req.body.username != process.env.ADMIN_NAME || req.body.password != process.env.ADMIN_PASSWORD) {
+        res.status(401).send({error: "invalid username or password, try again and contact your supervisor if issue persist"})
+        return
     }
     const payload = {username: req.username};
     const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '20m' })
@@ -132,7 +134,23 @@ app.post("/adminLoginPage", async (req, res) => {
     res.status(200).send({message: "Confirmed Login", token: token});
 })
 
-app.post("/uploadMenuItem", async (req, res) => {
+app.post("/managment/addMenuItem", async (req, res) => {
+    if(authorization.auth(req)){
+        let newItem = new menu({
+            image: req.body.image,
+            name: req.body.name,
+            price: req.body.price,
+            allergies: req.body.allergies
+        });  
+    
+       newItem.save();
+       res.status(201).send({information: "menuitem created"});
+    };
+    res.status(403).send({boundry: "ACCESS DENIED"});
+})
+
+//todo
+app.post("/managment/editMenuItem", async (req, res) => {
     let newItem = new menu({
         image: req.body.image,
         name: req.body.name,
@@ -146,4 +164,25 @@ app.post("/uploadMenuItem", async (req, res) => {
     */
    newItem.save();
 })
+
+//todo
+app.delete("/managment/removeMenuItem", async (req, res) => {
+    let newItem = new menu({
+        image: req.body.image,
+        name: req.body.name,
+        price: req.body.price,
+        allergies: req.body.allergies
+    });  
+    /*  VALIDATION NEEDED
+    if (validator) {
+        
+    }
+    */
+   newItem.save();
+})
+
+app.get("/menuItems", async (req, res) => {
+    res.status(200).send(await menu.find());
+})
+
 
