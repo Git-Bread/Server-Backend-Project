@@ -1,5 +1,5 @@
 //-------------------------------------------------- IMPORTS AND SETUP ------------------------------------------------------//
-import * as validator from "./validator.js";
+import validate, * as validator from "./validator.js";
 
 //express imports to facilitate the webbapp
 import express, { json } from "express";
@@ -48,6 +48,14 @@ const loginSchema = Schema({
     booked: Object
 });
 
+const menuSchema = Schema({
+    image: String,
+    name: String,
+    price: Number,
+    allergies: Array
+});
+
+
 //hashes password before adding it
 loginSchema.pre('validate', async function(next){
     let pass = this.password;
@@ -57,6 +65,7 @@ loginSchema.pre('validate', async function(next){
 
 //model
 const login = model("login", loginSchema);
+const menu = model("menu", menuSchema);
 
 //-------------------------------------------------- Operations ------------------------------------------------------//
 
@@ -112,4 +121,29 @@ app.post("/login", async (req, res) => {
     }
 })
 
+app.post("/adminLoginPage", async (req, res) => {
+    //validate for input errors
+    if (req.body.username != process.env.ADMIN_NAME && req.body.password != process.env.ADMIN_PASSWORD) {
+        res.status(400).send({error: "invalid username or password, try again and contact your supervisor if issue persist"})
+    }
+    const payload = {username: req.username};
+    const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '20m' })
+    console.log(token);
+    res.status(200).send({message: "Confirmed Login", token: token});
+})
+
+app.post("/uploadMenuItem", async (req, res) => {
+    let newItem = new menu({
+        image: req.body.image,
+        name: req.body.name,
+        price: req.body.price,
+        allergies: req.body.allergies
+    });  
+    /*  VALIDATION NEEDED
+    if (validator) {
+        
+    }
+    */
+   newItem.save();
+})
 
