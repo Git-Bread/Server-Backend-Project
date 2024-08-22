@@ -129,36 +129,44 @@ app.post("/managment/adminLoginPage", async (req, res) => {
         res.status(401).send({error: "invalid username or password, try again and contact your supervisor if issue persist"})
         return
     }
-    const payload = {username: req.username};
-    const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '20m' })
-    console.log(token);
+    let auth = "admin";
+    const payload = {access: auth};
+    const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '2h' })
     res.status(200).send({message: "Confirmed Login", token: token});
 })
 
+app.post("/management/adminCheck", async (req, res) => {
+    console.log(await authorization.adminAuth(req));
+    if(await authorization.adminAuth(req)) {
+        return res = true;
+    }
+    else {
+        return res = false;
+    }
+})
+
 app.post("/managment/addMenuItem", async (req, res) => {
-    if(authorization.auth(req)){
-        let test = await validator.menuItemValidation(req);
-        if (test != false) {
-            res.status(400).send({error: test})
-        }
-        if (!req.body.image) {
-            req.body.image = "no image";
-        }
-        if (!req.body.allergies) {
-            req.body.allergies = "no allergies";
-        }
-        let newItem = new menu({
-            image: req.body.image,
-            name: req.body.name,
-            description: req.body.string,
-            price: req.body.price,
-            allergies: req.body.allergies
-        });  
-    
-       newItem.save();
-       res.status(201).send({information: "menuitem created"});
-    };
-    res.status(403).send({boundry: "ACCESS DENIED"});
+    let test = await validator.menuItemValidation(req);
+    if (test != false) {
+        res.status(400).send({error: test})
+        return;
+    }
+    if (!req.body.image) {
+        req.body.image = "no image";
+    }
+    if (!req.body.allergies) {
+        req.body.allergies = "no allergies";
+    }
+    let newItem = new menu({
+        image: req.body.image,
+        name: req.body.name,
+        description: req.body.string,
+        price: req.body.price,
+        allergies: req.body.allergies
+    });  
+
+    newItem.save();
+    res.status(201).send({information: "menuitem created"});
 })
 
 //todo
@@ -168,11 +176,15 @@ app.put("/managment/editMenuItem", async (req, res) => {
         res.status(400).send({error: val})
     }
     await menu.updateOne({_id: req.body.id},{name: req.body.name, image: req.body.image, description: req.body.image, price: req.body.price, allergies: req.body.allergies})
-    res.json({message: "updated item"});
+    res.json({message: "updated item"});   
 })
 
 //todo
 app.delete("/managment/removeMenuItem", async (req, res) => {
+    if (menu.size < 1) {
+        console.log("no items found");
+        return;
+    }
     await menu.deleteOne({_id: req.body.id});
 })
 
