@@ -21,20 +21,26 @@ export async function auth(req) {
 }
 
 export async function adminAuth(req) {
+    let val = false;
     try {
         const head = req.headers['authorization'];
         const token = head && head.split(' ')[1]; //gets first space or Bearer TOKEN
-        if (token == null || token == undefined) {return false}
+
+        console.log(token);
+        if (token == "null") {
+            return false;
+        }
         verify(token, process.env.STANDARD_TOKEN, function(err, decoded) {
+            console.log(decoded);
             if (err) {
                 console.log("token missmatch detected");
             }
             if (decoded.access == "admin") {
-                console.log(decoded);
-                return true;
+                val = true;
             }
         })  
     } catch (error) {
         return false;
     }
+    return val;
 }

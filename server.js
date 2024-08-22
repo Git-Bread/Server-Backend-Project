@@ -119,7 +119,7 @@ app.post("/login", async (req, res) => {
         res.status(200).send({message: "Confirmed Login", token: token});
     }
     else {
-        res.status(400).send({error: ["Wrong password please try again"]});
+        res.status(400).send({error: "Wrong password please try again"});
     }
 })
 
@@ -133,16 +133,18 @@ app.post("/managment/adminLoginPage", async (req, res) => {
     const payload = {access: auth};
     const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '2h' })
     res.status(200).send({message: "Confirmed Login", token: token});
+    console.log("logged in successfully");
 })
 
 app.post("/management/adminCheck", async (req, res) => {
-    console.log(await authorization.adminAuth(req));
-    if(await authorization.adminAuth(req)) {
-        return res = true;
+    let response = await authorization.adminAuth(req);
+    console.log(response);
+    if(response) {
+        res.status(200).send(true);
+        return true;
     }
-    else {
-        return res = false;
-    }
+    res.status(200).send(false);
+    return false;
 })
 
 app.post("/managment/addMenuItem", async (req, res) => {
