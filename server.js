@@ -114,7 +114,6 @@ app.post("/login", async (req, res) => {
     if (val) {
         const payload = {username: req.username};
         const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '2h' })
-        console.log(token);
         res.status(200).send({message: "Confirmed Login", token: token});
     }
     else {
@@ -137,7 +136,6 @@ app.post("/managment/adminLoginPage", async (req, res) => {
 
 app.post("/management/adminCheck", async (req, res) => {
     let response = await authorization.adminAuth(req);
-    console.log(response);
     if(response) {
         res.status(200).send(true);
         return true;
@@ -157,11 +155,12 @@ app.post("/managment/addMenuItem", async (req, res) => {
     }
     let newItem = new menu({
         name: req.body.name,
-        description: req.body.string,
+        description: req.body.description,
         price: req.body.price,
         allergies: req.body.allergies
     });  
 
+    console.log(newItem);
     newItem.save();
     res.status(201).send({information: "menuitem created"});
 })
@@ -169,6 +168,7 @@ app.post("/managment/addMenuItem", async (req, res) => {
 //todo
 app.put("/managment/editMenuItem", async (req, res) => {
     let val = await validator.menuItemValidation(req);
+    console.log(req.body);
     if (val != false) {
         res.status(400).send({error: val})
     }
@@ -178,7 +178,6 @@ app.put("/managment/editMenuItem", async (req, res) => {
 
 //todo
 app.delete("/managment/removeMenuItem", async (req, res) => {
-    console.log(req);
     if (menu.size < 1) {
         console.log("no items found");
         return;

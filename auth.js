@@ -27,12 +27,10 @@ export async function adminAuth(req) {
         const head = req.headers['authorization'];
         const token = head && head.split(' ')[1]; //gets first space or Bearer TOKEN
 
-        console.log(token);
         if (token == "null") {
             return false;
         }
         verify(token, process.env.STANDARD_TOKEN, function(err, decoded) {
-            console.log(decoded);
             if (err) {
                 console.log("token missmatch detected");
             }
