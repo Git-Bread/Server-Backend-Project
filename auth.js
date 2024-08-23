@@ -2,6 +2,7 @@
 import jwt from "jsonwebtoken";
 const { verify } = jwt;
 
+//user login functionality, axed content
 export async function auth(req) {
     try {
         const head = req.headers['authorization'];

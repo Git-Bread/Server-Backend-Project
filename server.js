@@ -50,7 +50,6 @@ const loginSchema = Schema({
 });
 
 const menuSchema = Schema({
-    image: String,
     name: String,
     description: String,
     price: Number,
@@ -71,7 +70,7 @@ const menu = model("menu", menuSchema);
 
 //-------------------------------------------------- Operations ------------------------------------------------------//
 
-//register acount
+//User login functionaliy, Axed Content
 app.post("/register", async (req, res) => {
     //Error handling
     try {
@@ -97,7 +96,7 @@ app.post("/register", async (req, res) => {
     res.status(200).send({message: "Account registered"});
 })
 
-//Login
+//User login functionaliy, Axed Content
 app.post("/login", async (req, res) => {
     //validate for input errors
     try {
@@ -153,14 +152,10 @@ app.post("/managment/addMenuItem", async (req, res) => {
         res.status(400).send({error: test})
         return;
     }
-    if (!req.body.image) {
-        req.body.image = "no image";
-    }
     if (!req.body.allergies) {
         req.body.allergies = "no allergies";
     }
     let newItem = new menu({
-        image: req.body.image,
         name: req.body.name,
         description: req.body.string,
         price: req.body.price,
@@ -177,17 +172,23 @@ app.put("/managment/editMenuItem", async (req, res) => {
     if (val != false) {
         res.status(400).send({error: val})
     }
-    await menu.updateOne({_id: req.body.id},{name: req.body.name, image: req.body.image, description: req.body.image, price: req.body.price, allergies: req.body.allergies})
+    await menu.updateOne({_id: req.body.id},{name: req.body.name, description: req.body.description, price: req.body.price, allergies: req.body.allergies})
     res.json({message: "updated item"});   
 })
 
 //todo
 app.delete("/managment/removeMenuItem", async (req, res) => {
+    console.log(req);
     if (menu.size < 1) {
         console.log("no items found");
         return;
     }
-    await menu.deleteOne({_id: req.body.id});
+    try {
+        await menu.deleteOne({_id: req.body.id});   
+        res.status(200).send({information: "deleted"});
+    } catch (error) {
+        res.status(400).send({error: "invalid json"});
+    }
 })
 
 app.get("/menuItems", async (req, res) => {

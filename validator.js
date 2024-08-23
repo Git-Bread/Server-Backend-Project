@@ -114,6 +114,11 @@ export async function menuItemValidation(obj) {
     if (!obj.body.name) { errors.push("no menuitem name") };
     if (!obj.body.price) { errors.push("no menuitem price")};
     if (!obj.body.description) { errors.push("no menuitem description")};
+
+    if (!isNaN(obj.body.price)) {
+        errors.push("price is not a number")
+    }
+
     if (errors[0] != "") {
         return errors;
     }
