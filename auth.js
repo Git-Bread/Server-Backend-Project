@@ -21,15 +21,17 @@ export async function auth(req) {
     }
 }
 
+//authenticates token for remembering logins and performing operations
 export async function adminAuth(req) {
     let val = false;
     try {
         const head = req.headers['authorization'];
-        const token = head && head.split(' ')[1]; //gets first space or Bearer TOKEN
+        const token = head && head.split(' ')[1]; //gets first space or Bearer - TOKEN
 
         if (token == "null") {
             return false;
         }
+        //checks token against salt
         verify(token, process.env.STANDARD_TOKEN, function(err, decoded) {
             if (err) {
                 console.log("token missmatch detected");

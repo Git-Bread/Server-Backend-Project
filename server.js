@@ -40,15 +40,16 @@ connect(url)
     .then(() => {console.log("connected!")})
     .catch((error) => console.log("ERROR: " + error));
 
-//schema
+//login schema
 const loginSchema = Schema({
-    username: String,  //email
+    username: String,  //email for users
     password: String,
     name: String,
     number: Number,
     booked: Object
 });
 
+//item menu schema
 const menuSchema = Schema({
     name: String,
     description: String,
@@ -68,9 +69,10 @@ loginSchema.pre('validate', async function(next){
 const login = model("login", loginSchema);
 const menu = model("menu", menuSchema);
 
-//-------------------------------------------------- Operations ------------------------------------------------------//
 
-//User login functionaliy, Axed Content
+//--------------User login functionaliy, Axed Content, included cause seems like a waste to outright remove it--------//
+
+//user registration
 app.post("/register", async (req, res) => {
     //Error handling
     try {
@@ -121,12 +123,17 @@ app.post("/login", async (req, res) => {
     }
 })
 
+//-------------------------------------------------- Operations ------------------------------------------------------//
+
+//login page for admin users
 app.post("/managment/adminLoginPage", async (req, res) => {
-    //validate for input errors
+    //only one admin account as detailed in the env
     if (req.body.username != process.env.ADMIN_NAME || req.body.password != process.env.ADMIN_PASSWORD) {
         res.status(401).send({error: "invalid username or password, try again and contact your supervisor if issue persist"})
         return
     }
+
+    //sends a jwt payload with auth level, not needed currently but would be good if there was normal non-admin users
     let auth = "admin";
     const payload = {access: auth};
     const token = sign(payload, process.env.STANDARD_TOKEN, {expiresIn: '2h' })
@@ -134,6 +141,7 @@ app.post("/managment/adminLoginPage", async (req, res) => {
     console.log("logged in successfully");
 })
 
+//a token check to make sure the token is valid
 app.post("/management/adminCheck", async (req, res) => {
     let response = await authorization.adminAuth(req);
     if(response) {
@@ -144,6 +152,7 @@ app.post("/management/adminCheck", async (req, res) => {
     return false;
 })
 
+//creates a new menu item from sent variables
 app.post("/managment/addMenuItem", async (req, res) => {
     let test = await validator.menuItemValidation(req);
     if (test != false) {
@@ -165,7 +174,7 @@ app.post("/managment/addMenuItem", async (req, res) => {
     res.status(201).send({information: "menuitem created"});
 })
 
-//todo
+//edits menu item by changing the item with the same id
 app.put("/managment/editMenuItem", async (req, res) => {
     let val = await validator.menuItemValidation(req);
     console.log(req.body);
@@ -176,7 +185,7 @@ app.put("/managment/editMenuItem", async (req, res) => {
     res.json({message: "updated item"});   
 })
 
-//todo
+//removes a menu item
 app.delete("/managment/removeMenuItem", async (req, res) => {
     if (menu.size < 1) {
         console.log("no items found");
@@ -190,6 +199,7 @@ app.delete("/managment/removeMenuItem", async (req, res) => {
     }
 })
 
+//sends all menu items to the user, has no requirements since it isent secret
 app.get("/menuItems", async (req, res) => {
     res.status(200).send(await menu.find());
 })

@@ -108,7 +108,7 @@ export async function loginValidation(obj, login) {
     }
 }
 
-
+//simple menuitem validation, not to strict since only admins can edit it, so everything that works is mostly allowed
 export async function menuItemValidation(obj) {
     let errors = [];
     if (!obj.body.name) { errors.push("no menuitem name") };
